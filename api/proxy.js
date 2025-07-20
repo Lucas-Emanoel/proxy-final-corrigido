@@ -1,7 +1,9 @@
 // Arquivo: /api/proxy.js
-// VERSÃO SIMPLIFICADA SEM DEPENDÊNCIAS EXTERNAS
+// VERSÃO FINAL E CORRETA - Usando a sintaxe mais compatível
 
-export default async function handler(req, res) {
+const fetch = require('node-fetch');
+
+module.exports = async (req, res) => {
   // Adiciona os cabeçalhos CORS para permitir que seu app acesse o proxy.
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -13,15 +15,13 @@ export default async function handler(req, res) {
   }
 
   // Pega a URL do parâmetro 'url'.
-  const { searchParams } = new URL(req.url, `https://placeholder.com` );
-  const videoUrl = searchParams.get('url');
+  const videoUrl = req.query.url;
 
   if (!videoUrl) {
     return res.status(400).send('Erro: O parâmetro "url" é obrigatório.');
   }
 
   try {
-    // Usa o fetch nativo do ambiente Node.js
     const videoResponse = await fetch(videoUrl, {
       headers: {
         'Range': req.headers.range || '',
@@ -36,11 +36,10 @@ export default async function handler(req, res) {
     
     // Envia o status e o corpo da resposta
     res.status(videoResponse.status);
-    // ReadableStream.fromWeb está disponível em Node.js v16.5+
-    return videoResponse.body.pipeTo(res);
+    videoResponse.body.pipe(res);
 
   } catch (error) {
     console.error('Erro no proxy:', error);
     res.status(500).send('Erro interno no servidor de proxy.');
   }
-}
+};
