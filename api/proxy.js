@@ -1,20 +1,18 @@
 // Arquivo: /api/proxy.js
-// VERSÃO FINAL E CORRETA - Usando a sintaxe mais compatível
-
-const fetch = require('node-fetch');
+// VERSÃO MAIS SIMPLES POSSÍVEL
 
 module.exports = async (req, res) => {
-  // Adiciona os cabeçalhos CORS para permitir que seu app acesse o proxy.
+  // Adiciona os cabeçalhos CORS.
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Range');
 
-  // Responde à requisição de "sondagem" do navegador.
+  // Responde à requisição de "sondagem".
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Pega a URL do parâmetro 'url'.
+  // Pega a URL do parâmetro.
   const videoUrl = req.query.url;
 
   if (!videoUrl) {
@@ -22,25 +20,25 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Usa o fetch global do ambiente da Vercel.
     const videoResponse = await fetch(videoUrl, {
       headers: {
-        'Range': req.headers.range || '',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
-        'Referer': 'http://onixsmart.top/'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
+        'Referer': videoUrl // Usa a própria URL como referer.
       }
     });
 
-    // Repassa os cabeçalhos da resposta original
+    // Repassa os cabeçalhos da resposta original.
     res.setHeader('Content-Type', videoResponse.headers.get('content-type') || 'application/octet-stream');
-    res.setHeader('Content-Length', videoResponse.headers.get('content-length') || '0');
-    res.setHeader('Accept-Ranges', 'bytes');
     
-    // Envia o status e o corpo da resposta
+    // Envia o status e o corpo da resposta.
     res.status(videoResponse.status);
-    videoResponse.body.pipe(res);
+    // A forma mais segura de fazer o pipe do stream.
+    const body = await videoResponse.arrayBuffer();
+    res.end(Buffer.from(body));
 
   } catch (error) {
     console.error('Erro no proxy:', error);
-    res.status(500).send('Erro interno no servidor de proxy.');
+    res.status(500).send(`Erro interno no servidor de proxy: ${error.message}`);
   }
 };
