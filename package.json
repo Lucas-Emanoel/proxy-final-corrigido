@@ -1,7 +1,0 @@
-{
-  "name": "proxy-final-corrigido",
-  "version": "3.0.0",
-  "dependencies": {
-    "node-fetch": "^2.6.7"
-  }
-}
