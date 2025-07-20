@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     const videoResponse = await fetch(videoUrl, {
       headers: {
         'Range': req.headers.range || '',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
       }
     });
 
